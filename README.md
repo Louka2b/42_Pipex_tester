@@ -29,25 +29,32 @@ This script is a robust automated tester designed for the Pipex project (42 Netw
 7. Here_doc (Bonus): Simulates user input and checks append (`>>`) mode.
 
 ## 🛠️ Usage
+
+#### Clone in your pipex folder
+
+```BASH
+git clone https://github.com/Jishuashi/42_Pipex_tester pipex_tester && cd pipex_tester
+```
+
 ### 🚩 Basic Run
 ```BASH
-chmod +x test_args.sh
-./test_args.sh
+chmod +x pipex_tester.sh
+./pipex_tester.sh
 ```
 ### 🚀 Bonus Run
 ```BASH
-./test_args.sh --bonus
+./pipex_tester.sh --bonus
 ```
 ### 🎯 Targeted Run
 Run specific tests by their index numbers:
 ```BASH
-./test_args.sh --test 1 5 34
+./pipex_tester.sh --test 1 5 34
 ```
 
 ### 🧹 Clean Up
 Removes all generated `infiles/`, `outfiles/`, and trace logs:
 ```BASH
-./test_args.sh -r
+./pipex_tester.sh -r
 ```
 
 ## 📋 Trace Log
@@ -59,5 +66,5 @@ If a test fails, a pipex_error.trace file is generated (and displayed automatica
 - Valgrind leak and FD reports.
 
 ### Credit
-	>Author: Jishuashi & Help of Gemini \
+> Author: Jishuashi & Help of Gemini \
 Academic Context: 42 Network
