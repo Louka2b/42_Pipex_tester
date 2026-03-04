@@ -507,96 +507,102 @@ run_test "Sleep Err 04 (sleep1 + fake2)" "infiles/infile" "sleep 2" "fakecmd" "n
 run_test "Sleep Err 05 (sleep1 + no_out)" "infiles/infile" "sleep 2" "cat" "no_perm"
 
 # ==========================================
-# CATEGORY 7 & 8: BONUS
+# CATEGORY 7: DEEP ERROR & EDGE CASES
+# ==========================================
+CURRENT_CATEGORY="Category 7: Deep Error & Edge Cases"
+run_test "Deep 01 (Cmd is slash)" "infiles/infile" "/" "wc -l" "normal"
+run_test "Deep 02 (Cmd is dot)" "infiles/infile" "." "wc -l" "normal"
+run_test "Deep 03 (Invalid In + Invalid Cmd1)" "infiles/non_existant" "non_existant" "wc -l" "normal"
+run_test "Deep 04 (Invalid In + Invalid Cmd2)" "infiles/non_existant" "cat" "non_existant" "normal"
+run_test "Deep 05 (Space cmd)" "infiles/infile" " " "wc -l" "normal"
+run_test "Deep 06 (Empty string cmd)" "infiles/infile" "" "wc -l" "normal"
+
+# ==========================================
+# CATEGORY 8: SYSTEM FLUX & SIGPIPE
+# ==========================================
+CURRENT_CATEGORY="Category 8: System Flux & SIGPIPE"
+run_test "System 01 (SIGPIPE / head)" "infiles/big_infile" "cat" "head -n 1" "normal"
+run_test "System 02 (Large Data Flux)" "infiles/big_infile" "cat" "wc -c" "normal"
+run_test "System 03 (Binary data)" "/bin/ls" "cat" "wc -c" "normal"
+
+# ==========================================
+# CATEGORY 9: ENVIRONMENT & PATH STRESS
+# ==========================================
+CURRENT_CATEGORY="Category 9: Env & Path Stress"
+run_test "Env 01 (env -i + abs path)" "infiles/infile" "/bin/cat" "/usr/bin/wc" "normal"
+run_test "Env 02 (Glued args)" "infiles/infile" "ls -la" "grep -aLine" "normal"
+
+# ==========================================
+# CATEGORY 10: STRICT PERMISSIONS
+# ==========================================
+CURRENT_CATEGORY="Category 10: Strict Permissions"
+touch outfiles/no_write && chmod 444 outfiles/no_write
+touch outfiles/no_exec && chmod 644 outfiles/no_exec
+run_test "Perm 01 (Outfile no write)" "infiles/infile" "cat" "wc -l" "no_perm"
+run_test "Perm 02 (Cmd no exec)" "infiles/infile" "./outfiles/no_exec" "wc -l" "normal"
+run_test "Perm 03 (Infile no read)" "infiles/err_perm" "cat" "wc -l" "normal"
+
+# ==========================================
+# CATEGORY 11: ERROR BEHAVIOR
+# ==========================================
+CURRENT_CATEGORY="Category 11: Error Behavior"
+run_test "Exit 127 (Cmd not found)" "infiles/infile" "fake_cmd" "wc" "normal"
+run_test "Exit 126 (Is a directory)" "infiles/infile" "/dev" "wc" "normal"
+run_test "Infile Error (No file)" "non_existant" "cat" "wc" "normal"
+run_test "Permission denied (In)" "infiles/err_perm" "cat" "wc" "normal"
+
+# ==========================================
+# CATEGORY 12: ABSOLUTE & RELATIVE PATHS
+# ==========================================
+CURRENT_CATEGORY="Category 12: Absolute & Relative Paths"
+run_test "Path 01 (Abs path /bin/ls)" "infiles/infile" "/bin/ls" "wc -l" "normal"
+cp /bin/cat ./cat_tester
+run_test "Path 02 (Relative ./cat)" "infiles/infile" "./cat_tester" "wc -l" "normal"
+rm -f ./cat_tester
+run_test "Path 03 (Invalid Command)" "infiles/infile" "non_existent_cmd" "wc -l" "normal"
+
+# ==========================================
+# CATEGORY 13: PARALLEL EXECUTION & ZOMBIES
+# ==========================================
+CURRENT_CATEGORY="Category 13: Parallel & Zombies"
+run_test "Parallel 01 (Sleep parallel)" "infiles/infile" "sleep 2" "sleep 2" "normal"
+run_test "Parallel 02 (Long then Short)" "infiles/infile" "sleep 2" "ls" "normal"
+run_test "Parallel 03 (Short then Long)" "infiles/infile" "ls" "sleep 2" "normal"
+
+# ==========================================
+# CATEGORY 14: COMPLEX PARSING
+# ==========================================
+CURRENT_CATEGORY="Category 14: Complex Parsing"
+run_test "Parsing 01 (Sed spaces)" "infiles/infile" "sed 's/Line/Test OK/g'" "cat" "normal"
+run_test "Parsing 02 (Grep phrase)" "infiles/infile" "grep 'Line 1'" "cat" "normal"
+run_test "Parsing 03 (Multi-spaces)" "infiles/infile" "ls      -l" "grep    Line" "normal"
+run_test "Parsing 04 (Empty quotes)" "infiles/infile" "cat" "grep ''" "normal"
+run_test "Parsing 05 (Tr sets)" "infiles/infile" "tr 'a-z' 'A-Z'" "cat" "normal"
+# ==========================================
+# CATEGORY 15: PIPE BUFFER SATURATION (STRESS)
+# ==========================================
+CURRENT_CATEGORY="Category 15: Pipe Buffer Saturation"
+run_test "Buffer 01 (50k lines stress)" "infiles/big_infile" "cat" "wc -l" "normal"
+run_test "Buffer 02 (Binary flux stress)" "/dev/urandom" "head -c 1000000" "wc -c" "normal"
+
+# ==========================================
+# CATEGORY 16 & 17: BONUS
 # ==========================================
 if [ "$IS_BONUS" = true ]; then
-    CURRENT_CATEGORY="Category 7: Multiple Pipes"
+    CURRENT_CATEGORY="Category 16: Multiple Pipes"
     run_test_multi "Multi 01 (3 cmds)" "infiles/infile" "cat" "grep Line" "wc -l" "normal"
     run_test_multi "Multi 02 (4 cmds)" "infiles/infile" "cat" "head -n 2" "rev" "wc -c" "normal"
     run_test_multi "Multi 03 (5 cmds + args)" "infiles/infile" "cat -e" "grep 1" "rev" "sort" "wc -c" "normal"
     run_test_multi "Multi 04 (Sleep parallel)" "infiles/infile" "sleep 2" "sleep 2" "sleep 2" "normal"
     run_test_multi "Multi 05 (Fake cmd middle)" "infiles/infile" "cat" "fakecmd" "wc -l" "normal"
     
-    CURRENT_CATEGORY="Category 8: Here_doc"
+    CURRENT_CATEGORY="Category 17: Here_doc"
     run_test_heredoc "Heredoc 01 (Basic)" "EOF" "cat" "wc -l" "normal"
     run_test_heredoc "Heredoc 02 (Grep)" "STOP" "grep Line" "wc -c" "normal"
     run_test_heredoc "Heredoc 03 (Empty limiter)" "" "cat" "wc -l" "normal"
     run_test_heredoc "Heredoc 04 (Fake cmd)" "LIMITER" "fakecmd" "wc -l" "normal"
     run_test_heredoc "Heredoc 05 (No perm out)" "EOF" "cat" "wc -l" "no_perm"
 fi
-
-# ==========================================
-# CATEGORY 9: DEEP ERROR & EDGE CASES
-# ==========================================
-CURRENT_CATEGORY="Category 9: Deep Error & Edge Cases"
-
-# Test du slash (Dossier au lieu de commande) - Classique pour les leaks
-run_test "Deep 01 (Cmd is slash)" "infiles/infile" "/" "wc -l" "normal"
-run_test "Deep 02 (Cmd is dot)" "infiles/infile" "." "wc -l" "normal"
-
-# Infile invalide ET commande invalide (L'erreur d'infile doit s'afficher en premier)
-run_test "Deep 03 (Invalid In + Invalid Cmd1)" "infiles/non_existant" "non_existant" "wc -l" "normal"
-run_test "Deep 04 (Invalid In + Invalid Cmd2)" "infiles/non_existant" "cat" "non_existant" "normal"
-
-# Permission sur binaire
-touch outfiles/no_exec_cmd && chmod 000 outfiles/no_exec_cmd
-run_test "Deep 05 (No exec perm cmd1)" "infiles/infile" "./outfiles/no_exec_cmd" "wc -l" "normal"
-
-# Path vide ou espace seul
-run_test "Deep 06 (Space cmd)" "infiles/infile" " " "wc -l" "normal"
-run_test "Deep 07 (Empty string cmd)" "infiles/infile" "" "wc -l" "normal"
-
-# ==========================================
-# CATEGORY 10: ERRORS MESSAGES & CODES
-# ==========================================
-CURRENT_CATEGORY="Category 10: Error Messages & Exit Codes"
-
-check_error_behavior() {
-    check_run_and_print_cat || return 0
-    
-    T_NAME="$1"; IN="$2"; C1="$3"; C2="$4"; OUT="outfiles/out_err"
-    ERR_BASH="$TMP_DIR/msg_bash"; ERR_PIPEX="$TMP_DIR/msg_pipex"
-    
-    # On capture le stderr et le exit code de Bash
-    bash -c "< $IN $C1 | $C2 > /dev/null" 2> "$ERR_BASH"
-    B_CODE=$?
-    
-    # On capture le stderr et le exit code de Pipex
-    ./pipex "$IN" "$C1" "$C2" "$OUT" 2> "$ERR_PIPEX"
-    P_CODE=$?
-    
-    MSG_OK=true
-    CODE_OK=true
-    
-    # Vérification du Code (Strict)
-    if [ "$B_CODE" -ne "$P_CODE" ]; then CODE_OK=false; fi
-    
-    # Vérification du message (on vérifie si les mots clés sont là)
-    # Exemple: si bash dit "No such file", pipex doit le dire aussi
-    K_WORD=$(awk -F: '{print $NF}' "$ERR_BASH" | xargs)
-    if ! grep -qi "$K_WORD" "$ERR_PIPEX"; then MSG_OK=false; fi
-
-    [ "$CODE_OK" = true ] && S_CODE="${GREEN}Code [Ok]${RESET}" || S_CODE="${RED}Code [KO]${RESET}"
-    [ "$MSG_OK" = true ] && S_MSG="${GREEN}Msg [Ok]${RESET}" || S_MSG="${RED}Msg [KO]${RESET}"
-    
-    printf "[%02d] [ %-35s ] %b %b %b\n" "$TEST_INDEX" "$T_NAME" "$S_CODE" "$S_MSG"
-    
-    if [ "$CODE_OK" = false ] || [ "$MSG_OK" = false ]; then
-        echo -e "${RED}❌ FAIL: $T_NAME${RESET}" >> "$TRACE_FILE"
-        echo "Bash Exit: $B_CODE | Pipex Exit: $P_CODE" >> "$TRACE_FILE"
-        echo "Bash Err: $(cat $ERR_BASH)" >> "$TRACE_FILE"
-        echo "Pipex Err: $(cat $ERR_PIPEX)" >> "$TRACE_FILE"
-        echo "---------------------------------" >> "$TRACE_FILE"
-    else
-        ((TOTAL_PASSED++))
-    fi
-}
-
-check_error_behavior "Exit 127 (Cmd not found)" "infiles/infile" "ls" "not_a_cmd"
-check_error_behavior "Exit 126 (Is a directory)" "infiles/infile" "/dev/null" "wc -l"
-check_error_behavior "Infile Error (No file)" "non_existant" "cat" "wc -l"
-check_error_behavior "Permission denied (In)" "infiles/err_perm" "cat" "wc -l"
-
 
 # ==========================================
 # FINAL RESULTS AND TRACE OUTPUT
