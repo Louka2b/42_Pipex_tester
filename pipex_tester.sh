@@ -497,17 +497,27 @@ run_test_args "Args 04 (6 args)" "infiles/infile" "cat" "" "" "out_pipex"
 run_test_args "Args 05 (7 arguments)" "infiles/infile" "cat" "wc -l" "grep a" "ls" "outfiles/outfile"
 
 # ==========================================
-# CATEGORY 6 & 7: BONUS
+# CATEGORY 6: SLEEP ERRORS 
+# ==========================================
+CURRENT_CATEGORY="Category 6: Sleep Errors"
+run_test "Sleep Err 01 (fake1 + sleep2)" "infiles/infile" "fakecmd" "sleep 2" "normal"
+run_test "Sleep Err 02 (no_in + sleep2)" "fake_in" "cat" "sleep 2" "normal"
+run_test "Sleep Err 03 (perm_in + sleep2)" "infiles/err_perm" "cat" "sleep 2" "normal"
+run_test "Sleep Err 04 (sleep1 + fake2)" "infiles/infile" "sleep 2" "fakecmd" "normal"
+run_test "Sleep Err 05 (sleep1 + no_out)" "infiles/infile" "sleep 2" "cat" "no_perm"
+
+# ==========================================
+# CATEGORY 7 & 8: BONUS
 # ==========================================
 if [ "$IS_BONUS" = true ]; then
-    CURRENT_CATEGORY="Category 6: Multiple Pipes"
+    CURRENT_CATEGORY="Category 7: Multiple Pipes"
     run_test_multi "Multi 01 (3 cmds)" "infiles/infile" "cat" "grep Line" "wc -l" "normal"
     run_test_multi "Multi 02 (4 cmds)" "infiles/infile" "cat" "head -n 2" "rev" "wc -c" "normal"
     run_test_multi "Multi 03 (5 cmds + args)" "infiles/infile" "cat -e" "grep 1" "rev" "sort" "wc -c" "normal"
     run_test_multi "Multi 04 (Sleep parallel)" "infiles/infile" "sleep 2" "sleep 2" "sleep 2" "normal"
     run_test_multi "Multi 05 (Fake cmd middle)" "infiles/infile" "cat" "fakecmd" "wc -l" "normal"
     
-    CURRENT_CATEGORY="Category 7: Here_doc"
+    CURRENT_CATEGORY="Category 8: Here_doc"
     run_test_heredoc "Heredoc 01 (Basic)" "EOF" "cat" "wc -l" "normal"
     run_test_heredoc "Heredoc 02 (Grep)" "STOP" "grep Line" "wc -c" "normal"
     run_test_heredoc "Heredoc 03 (Empty limiter)" "" "cat" "wc -l" "normal"
@@ -515,15 +525,7 @@ if [ "$IS_BONUS" = true ]; then
     run_test_heredoc "Heredoc 05 (No perm out)" "EOF" "cat" "wc -l" "no_perm"
 fi
 
-# ==========================================
-# CATEGORY 8: SLEEP ERRORS (NEW ADDITION)
-# ==========================================
-CURRENT_CATEGORY="Category 8: Sleep Errors"
-run_test "Sleep Err 01 (fake1 + sleep2)" "infiles/infile" "fakecmd" "sleep 2" "normal"
-run_test "Sleep Err 02 (no_in + sleep2)" "fake_in" "cat" "sleep 2" "normal"
-run_test "Sleep Err 03 (perm_in + sleep2)" "infiles/err_perm" "cat" "sleep 2" "normal"
-run_test "Sleep Err 04 (sleep1 + fake2)" "infiles/infile" "sleep 2" "fakecmd" "normal"
-run_test "Sleep Err 05 (sleep1 + no_out)" "infiles/infile" "sleep 2" "cat" "no_perm"
+
 
 # ==========================================
 # FINAL RESULTS AND TRACE OUTPUT
