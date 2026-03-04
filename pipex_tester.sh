@@ -462,8 +462,9 @@ CURRENT_CATEGORY="Category 3: Empty Commands"
 run_test "Empty 01 (empty cmd1)" "infiles/infile" '""' "wc -l" "normal"
 run_test "Empty 02 (empty cmd2)" "infiles/infile" "cat" '""' "normal"
 run_test "Empty 03 (both empty)" "infiles/infile" '""' '""' "normal"
-run_test "Path 01 (invalid path cmd1)" "infiles/infile" "/bin/notfound" "wc -l" "normal"
-run_test "Path 02 (invalid path cmd2)" "infiles/infile" "cat" "/usr/bin/notfound" "normal"
+# CHANGED HERE: Replaced '.' with '/bin/notfound'
+run_test "Empty 04 (cmd1 invalid path)" "infiles/infile" "/bin/notfound" "wc -l" "normal"
+run_test "Empty 05 (cmd2 invalid path)" "infiles/infile" "cat" "/usr/bin/notfound" "normal"
 run_test "Empty 06 (cmd1 slash)" "infiles/infile" "/" "wc -l" "normal"
 run_test "Empty 07 (cmd2 slash)" "infiles/infile" "cat" "/" "normal"
 run_test "Empty 08 (cmd1 dbl quotes)" "infiles/infile" '"" ""' "wc -l" "normal"
@@ -513,6 +514,16 @@ if [ "$IS_BONUS" = true ]; then
     run_test_heredoc "Heredoc 04 (Fake cmd)" "LIMITER" "fakecmd" "wc -l" "normal"
     run_test_heredoc "Heredoc 05 (No perm out)" "EOF" "cat" "wc -l" "no_perm"
 fi
+
+# ==========================================
+# CATEGORY 8: SLEEP ERRORS (NEW ADDITION)
+# ==========================================
+CURRENT_CATEGORY="Category 8: Sleep Errors"
+run_test "Sleep Err 01 (fake1 + sleep2)" "infiles/infile" "fakecmd" "sleep 2" "normal"
+run_test "Sleep Err 02 (no_in + sleep2)" "fake_in" "cat" "sleep 2" "normal"
+run_test "Sleep Err 03 (perm_in + sleep2)" "infiles/err_perm" "cat" "sleep 2" "normal"
+run_test "Sleep Err 04 (sleep1 + fake2)" "infiles/infile" "sleep 2" "fakecmd" "normal"
+run_test "Sleep Err 05 (sleep1 + no_out)" "infiles/infile" "sleep 2" "cat" "no_perm"
 
 # ==========================================
 # FINAL RESULTS AND TRACE OUTPUT
